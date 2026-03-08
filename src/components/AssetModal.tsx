@@ -252,8 +252,23 @@ export function AssetModal({ open, onClose, onSave, onUpdate, editingAsset, exis
 
           {type === "image" && (
             <div className="space-y-2">
-              <Label>Image URL</Label>
-              <Input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." />
+              <Label>Upload Image (max 20 MB)</Label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 20 * 1024 * 1024) {
+                    setErrors(prev => ({ ...prev, imageUrl: "File must be under 20 MB" }));
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = () => setImageUrl(reader.result as string);
+                  reader.readAsDataURL(file);
+                }}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium cursor-pointer"
+              />
               {imageUrl && (
                 <img src={imageUrl} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
               )}
